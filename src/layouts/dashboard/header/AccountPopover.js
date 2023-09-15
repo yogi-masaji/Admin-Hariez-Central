@@ -1,21 +1,25 @@
 import { useState } from 'react';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import { alpha } from '@mui/material/styles';
-import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
+import {
+  Box,
+  Divider,
+  Typography,
+  Stack,
+  MenuItem,
+  Avatar,
+  IconButton,
+  Popover,
+  CircularProgress,
+} from '@mui/material';
 // mocks_
 import account from '../../../_mock/account';
 
 // ----------------------------------------------------------------------
 
 const MENU_OPTIONS = [
-  {
-    label: 'Home',
-    icon: 'eva:home-fill',
-  },
-  {
-    label: 'Profile',
-    icon: 'eva:person-fill',
-  },
   {
     label: 'Settings',
     icon: 'eva:settings-2-fill',
@@ -26,6 +30,8 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -35,6 +41,19 @@ export default function AccountPopover() {
     setOpen(null);
   };
 
+  const handleLogout = () => {
+    setLoading(true); // Set loading state to true
+    Cookies.remove('token');
+    Cookies.remove('data');
+    setTimeout(() => {
+      setLoading(false); // Set loading state to false
+      navigate('/login', { replace: true });
+    }, 2000);
+  };
+
+  const handleProfile = () => {
+    navigate('/dashboard/profile', { replace: true });
+  };
   return (
     <>
       <IconButton
@@ -76,29 +95,21 @@ export default function AccountPopover() {
           },
         }}
       >
-        <Box sx={{ my: 1.5, px: 2.5 }}>
-          <Typography variant="subtitle2" noWrap>
-            {account.displayName}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
-          </Typography>
-        </Box>
+        {/* Rest of the code... */}
 
         <Divider sx={{ borderStyle: 'dashed' }} />
-
-        <Stack sx={{ p: 1 }}>
-          {MENU_OPTIONS.map((option) => (
-            <MenuItem key={option.label} onClick={handleClose}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Stack>
-
-        <Divider sx={{ borderStyle: 'dashed' }} />
-
-        <MenuItem onClick={handleClose} sx={{ m: 1 }}>
-          Logout
+        <MenuItem onClick={handleProfile} sx={{ m: 1 }}>
+          Profile
+        </MenuItem>
+        <MenuItem onClick={handleLogout} sx={{ m: 1 }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <CircularProgress size={16} sx={{ mr: 1 }} />
+              Logging out...
+            </Box>
+          ) : (
+            'Logout'
+          )}
         </MenuItem>
       </Popover>
     </>
